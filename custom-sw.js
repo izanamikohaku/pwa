@@ -1,31 +1,29 @@
 var db;
 function createDB() {
-  var request = self.indexedDB.open("sync-data", 1);
-  request.onerror = function(event) {
-      console.log("error: " + event);
-  };
-  request.onsuccess = function(event) {
-      db = request.result;
-      console.log("success: "+ db);
-  };
-}
-function readDB() {
   return new Promise((resolve, reject) => {
-      var request = db.transaction("data").objectStore("data").getAll();
-      request.onsuccess = function(event) {
-          resolve(event.target.result)
-      }
-      request.onerror = function(event) {
-          console.log("Unable to add data ");
-          reject(false)
-      }
+    var request = self.indexedDB.open("sync-data", 1);
+    request.onerror = function(event) {
+      reject(event)
+    };
+    request.onsuccess = function(event) {
+      resolve(request.result)
+    };
   });
 }
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    createDB()
-  );
-});
+function readDB() {
+  return createDB().then(db =>{
+    return new Promise((resolve, reject) => {
+        var request = db.transaction("data").objectStore("data").getAll();
+        request.onsuccess = function(event) {
+            resolve(event.target.result)
+        }
+        request.onerror = function(event) {
+            console.log("Unable to add data ");
+            reject(false)
+        }
+    });
+  });
+}
 self.addEventListener('sync', event => {
   if (event.tag == 'send-data') {
     event.waitUntil(
@@ -35,7 +33,8 @@ self.addEventListener('sync', event => {
           body: JSON.stringify(result),
           headers: { 'Content-Type': 'application/json' }
         }).then((event) => {
-          console.log(event)
+          event.ports[0].postMessage('1111')
+          
         }).catch(err => {
           console.log(err)
         })
