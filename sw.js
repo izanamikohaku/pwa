@@ -23,5 +23,6 @@ workbox.precaching.cleanupOutdatedCaches()
 // --------------------------------------------------
 
 // Register route handlers for runtimeCaching
+workbox.routing.registerRoute(new RegExp('https://fonts.gstatic.com/s/materialicons/.*'), new workbox.strategies.NetworkFirst ({}), 'GET')
 workbox.routing.registerRoute(new RegExp('/pwa/_nuxt/'), new workbox.strategies.CacheFirst ({}), 'GET')
 workbox.routing.registerRoute(new RegExp('/pwa/'), new workbox.strategies.NetworkFirst ({}), 'GET')
